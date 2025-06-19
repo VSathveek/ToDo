@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .whiteboard-list-wrapper {
+        max-width: 800px;
+        margin: 2rem auto;
+        font-family: Arial, sans-serif;
+    }
+
+    .whiteboard-card {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .whiteboard-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5rem;
+    }
+
+    .whiteboard-card-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .create-btn {
+        padding: 6px 12px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+
+    .create-btn:hover {
+        background-color: #218838;
+    }
+
+    .whiteboard-list {
+        margin-top: 1rem;
+    }
+
+    .whiteboard-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .whiteboard-item:last-child {
+        border-bottom: none;
+    }
+
+    .whiteboard-title {
+        font-weight: bold;
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    .whiteboard-title:hover {
+        text-decoration: underline;
+    }
+
+    .whiteboard-meta {
+        font-size: 0.85rem;
+        color: #666;
+        margin-left: 0.5rem;
+    }
+
+    .whiteboard-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .whiteboard-actions button,
+    .whiteboard-actions .share-btn {
+        padding: 4px 8px;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+    }
+
+    .whiteboard-actions button:hover,
+    .whiteboard-actions .share-btn:hover {
+        background-color: #f8f8f8;
+    }
+
+    .whiteboard-actions .delete-btn {
+        color: red;
+        border-color: red;
+    }
+
+    .whiteboard-actions .delete-btn:hover {
+        background-color: #ffe5e5;
+    }
+
+    .whiteboard-empty {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #eef5ff;
+        border: 1px solid #aaccee;
+        border-radius: 6px;
+        color: #333;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 1rem;
+        border-radius: 6px;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    .modal-header,
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h5 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+    }
+
+    .modal-body {
+        margin-top: 1rem;
+    }
+
+    .modal-body input[type="text"] {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .modal-footer {
+        margin-top: 1rem;
+    }
+
+    .modal-footer button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="whiteboard-list-wrapper">
+    <div class="whiteboard-card">
+        <div class="whiteboard-card-header">
+            <h2>My Whiteboards</h2>
+            <a href="{% url 'create_whiteboard' %}" class="create-btn">＋ New Whiteboard</a>
+        </div>
+        <div class="whiteboard-card-body">
+            {% if whiteboards %}
+            <div class="whiteboard-list">
+                {% for whiteboard in whiteboards %}
+                <div class="whiteboard-item">
+                    <div>
+                        <a class="whiteboard-title" href="{% url 'view_whiteboard' whiteboard.id %}">
+                            {{ whiteboard.title }}
+                        </a>
+                        <span class="whiteboard-meta">
+                            Created: {{ whiteboard.created_at|date:"M d, Y" }}
+                        </span>
+                    </div>
+                    <div class="whiteboard-actions">
+                        <button class="share-btn" data-id="{{ whiteboard.id }}">Share</button>
+                        <form class="delete-form" action="{% url 'delete_whiteboard' whiteboard.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="whiteboard-empty">
+                You haven't created any whiteboards yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="shareModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5>Share Whiteboard</h5>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="shareForm" method="post">
+                {% csrf_token %}
+                <label>Username to share with</label>
+                <input type="text" name="username" required>
+                <input type="hidden" name="whiteboard_id" id="shareWhiteboardId">
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">Close</button>
+            <button type="submit" form="shareForm" class="btn-primary">Share</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            document.getElementById('shareWhiteboardId').value = id;
+            document.getElementById('shareModal').style.display = 'flex';
+        });
+    });
+
+    function closeModal() {
+        document.getElementById('shareModal').style.display = 'none';
+    }
+
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', e => {
+            if (!confirm('Are you sure you want to delete this whiteboard?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

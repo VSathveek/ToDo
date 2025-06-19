@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    /* Search results message styling */
+    .search-results-message {
+        text-align: center;
+        margin: 2rem 0;
+        font-size: 1.2rem;
+        color: #666;
+        font-family: "Urbanist", sans-serif;
+    }
+    
+    .search-query {
+        font-weight: bold;
+        color: #6862da;
+    }
+
+    h1 {
+        margin-left: 390px;
+        font-size: 2rem;
+        color: #2C3E50;
+        margin-bottom: 2rem;
+    }
+
+    .task-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        padding: 0 0px;
+        width: 90%;
+        font-family: "Urbanist", sans-serif;
+        font-optical-sizing: auto;
+        font-style: normal;
+    }
+
+    .task-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease-in-out;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid #ddd;
+        width: 300px;
+        margin: 10px;
+    }
+
+    .task-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    .task-header h3 {
+        font-size: 1.4rem;
+        color: #2C3E50;
+        margin-bottom: 0.8rem;
+        font-weight: 600;
+        padding: 0 15px;
+    }
+
+    .task-header p {
+        font-size: 1rem;
+        color: #7F8C8D;
+        margin: 0.3rem 0;
+        line-height: 1.5;
+        padding: 0 15px;
+    }
+
+    .task-actions {
+        margin-top: auto;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .view-task-btn, .mark-completed-btn {
+        text-decoration: none;
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 1.2rem;
+        font-weight: 500;
+        text-align: center;
+        transition: background-color 0.3s ease;
+        border: none;
+        letter-spacing: 1px;
+        width: 150px;
+        height: 40px;
+    }
+
+    .view-task-btn {
+        background-color: #6862da;
+        font-family: "Urbanist", sans-serif;
+    }
+
+    .mark-completed-btn {
+        background-color: #838184;
+        font-family: "Urbanist", sans-serif;
+    }
+
+    .view-task-btn:hover {
+        background-color: #564fe7;
+    }
+
+    .mark-completed-btn:hover {
+        background-color: #727475;
+    }
+
+    .task-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: #6760f4;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .task-header p strong {
+        color: #2C3E50;
+    }
+
+    .task-status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .task-completed-mark {
+        position: absolute;
+        top: 5px;
+        right: 23px;
+    }
+
+    .green {
+        background-color: green;
+    }
+
+    .yellow {
+        background-color: rgb(217, 158, 39);
+    }
+
+    .red {
+        background-color: red;
+    }
+
+    #NoTask {
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        color: #c3c2c2;
+        position: relative;
+        top: 200px;
+    }
+
+    #Notask {
+        position: absolute;
+        top: 50px;
+        left: 600px;
+    }
+
+    /* No tasks container */
+    .no-tasks-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 50px;
+    }
+</style>
+
+<!-- Search Results Message -->
+{% if request.GET.q %}
+    <div class="search-results-message">
+        {% if tasks %}
+            Showing your tasks matching <span class="search-query">"{{ request.GET.q }}"</span>
+        {% else %}
+            No tasks found matching <span class="search-query">"{{ request.GET.q }}"</span>
+        {% endif %}
+    </div>
+{% endif %}
+
+<!-- Empty State (only shown when no search and no tasks) -->
+{% if not tasks and not request.GET.q %}
+    <div class="no-tasks-container">
+        <div id="Notask">
+            <p id="NoTask" style="font-family: 'Urbanist', sans-serif;">Hey {{ user.username }}</p>
+            <p id="NoTask" style="font-family: 'Urbanist', sans-serif;">Create Tasks to View Here</p>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Tasks Grid -->
+<div class="task-container">
+    {% for task in tasks %}
+        <div class="task-card">
+            <div class="task-status-dot 
+                {% if task.status == 'completed' %}green
+                {% elif task.status == 'overdue' %}red
+                {% elif task.status == 'warning' %}yellow
+                {% else %}green{% endif %}">
+            </div>
+            
+            {% if task.completed %}
+                <div class="task-completed-mark">✔</div>
+            {% endif %}
+            
+            <div class="task-header">
+                <h3>{{ task.name }}</h3>
+                {% if task.start_task_on %}
+                    <p><strong>Start Date:</strong> {{ task.start_task_on|date:"M d, Y" }}</p>
+                {% endif %}
+                {% if task.deadline %}
+                    <p><strong>Finish Date:</strong> {{ task.deadline|date:"M d, Y" }}</p>
+                {% endif %}
+            </div>
+            {% if task.is_shared %}
+            <div class="shared-badge">
+                Shared by {{ task.created_by.username }}
+            </div>
+            {% endif %}
+
+            <div class="task-actions">
+                <a href="{% url 'task_detail' task.id %}" class="view-task-btn">
+                    Show
+                </a>
+                {% if not task.completed %}
+                <button class="mark-completed-btn" 
+                        data-task-id="{{ task.id }}" 
+                        onclick="markAsCompleted(this.getAttribute('data-task-id'), this)">
+                    Mark
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Optional: Add this if you want to preserve the search when marking tasks as complete
+    function markAsCompleted(taskId, element) {
+        const searchQuery = new URLSearchParams(window.location.search).get('q') || '';
+        // Your existing markAsCompleted logic
+        // Make sure to include the search query in any redirect/refresh
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Calendar{% endblock %}
+
+{% block content %}
+  <!-- Main Heading Style -->
+  <h1 class="calendar-title">Task Calendar</h1>
+  
+  <!-- Calendar Container -->
+  <div id="calendar" class="calendar-container"></div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <!-- FullCalendar CSS and JS from CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
+  <style>
+    /* Global Body and Font */
+    body {
+      font-family: 'Urbanist', sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* Main title styling */
+    .calendar-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+
+      color: #4a4a4a;
+    }
+
+    /* Container for the calendar */
+    .calendar-container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-height:80vh;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    /* Styling FullCalendar's Header */
+    .fc-header-toolbar {
+      background-color:#6a64f1;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Style for buttons in FullCalendar header */
+    .fc-button {
+      background-color: #2980b9;
+      border-color: #2980b9;
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-radius: 4px;
+      padding: 8px 16px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .fc-button:hover {
+      background-color: #3498db;
+      border-color: #3498db;
+    }
+
+    .fc-button:focus {
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.5);
+    }
+
+    /* Style for the calendar's event items */
+    .fc-daygrid-event {
+      font-size: 14px;
+      padding: 8px;
+      font-family: 'Arial', sans-serif;
+      color: #fff;
+      border-radius: 6px;
+      background-color:#6a64f1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .fc-daygrid-event:hover {
+      transform: scale(1.05);
+    }
+
+    .fc-daygrid-event-title {
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* Styling the calendar date numbers */
+    .fc-daygrid-day-number {
+      font-size: 14px;
+      font-weight: bold;
+      color: #4a4a4a;
+    }
+
+    /* Customizing the current date's styling */
+    .fc-daygrid-day.fc-day-today {
+      background-color: #f3f3f3;
+      border-radius: 5px;
+    }
+
+    /* Style the tooltips for events */
+    .fc-daygrid-event .fc-tooltip {
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 5px 10px;
+      font-size: 13px;
+      border-radius: 4px;
+    }
+
+  </style>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var calendarEl = document.getElementById('calendar');
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',  // Default view: month
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth'  // Buttons for Month, Week, and Day views
+        },
+        events: '{% url "tasks_json" %}',  // Your JSON endpoint for task events
+        eventColor: '#1abc9c',  // Event default color
+        eventTextColor: '#fff',  // Event text color
+        height: 'auto',  // Adjust the height automatically
+        contentHeight: 'auto',  // Automatically adjust content height based on screen size
+      });
+      calendar.render();
+    });
+  </script>
+{% endblock %}

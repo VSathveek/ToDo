@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Confirm Delete Task{% endblock %}
+
+{% block content %}
+<div id="confirm-delete-page">
+  <div class="center-container">
+    <h1>Confirm Delete Task</h1>
+    <p>Are you sure you want to delete the task "{{ task.name }}"?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, delete</button>
+      <a href="{% url 'task_detail' task.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

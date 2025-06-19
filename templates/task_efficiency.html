@@ -1,0 +1,17 @@
+<!-- task_efficiency.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Task Efficiency{% endblock %}
+
+{% block content %}
+  <h1 style="    font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  padding-left: 8rem;
+  color: #333;font-family: 'Urbanist', sans-serif;
+        font-optical-sizing: auto;
+        font-style: normal;color:rgba(0, 0, 0, 0.638)">Task Efficiency</h1>
+  <!-- The image is generated dynamically by the chart_image view -->
+  <img src="{% url 'chart_image' %}" alt="Task Efficiency Chart" style="max-width:75%; height:auto; margin-top:10px">
+  <!--<a href="{% url 'home' %}" class="btn btn-secondary">Back to Dashboard</a>-->
+{% endblock %}

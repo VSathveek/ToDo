@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Projects{% endblock %}
+{% block content %}
+<style>
+  /* Editor Container Styles */
+  .editor-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Toolbar Styles */
+  .editor-toolbar {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem;
+    border-right: 1px solid #e0e0e0;
+    margin-right: 0.25rem;
+  }
+  
+  .toolbar-group:last-child {
+    border-right: none;
+    margin-right: 0;
+  }
+  
+  .option-button {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #333;
+    transition: all 0.2s;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .option-button:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+  }
+  
+  .option-button.active {
+    background: #e0e0e0;
+    border-color: #bbb;
+  }
+  
+  .adv-option-button {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  /* Editor Content Area */
+  .editor-content {
+    min-height: 400px;
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+    outline: none;
+    background: white;
+    line-height: 1.6;
+    color:#000000;
+  }
+  
+  .editor-content:focus {
+    border-color: #0077cc; /* Ocean blue focus color */
+  }
+  
+  /* Header Styles */
+  .editor-content h1 {
+    font-size: 2em;
+    color: #000000; /* Ocean blue */
+    margin: 0.67em 0;
+  }
+  
+  .editor-content h2 {
+    font-size: 1.5em;
+    color: #000000; /* Lighter ocean blue */
+    margin: 0.75em 0;
+  }
+  
+  .editor-content h3 {
+    font-size: 1.17em;
+    color: #000000; /* Even lighter ocean blue */
+    margin: 0.83em 0;
+  }
+  
+  .editor-content h4 {
+    font-size: 1em;
+    color: #000000; /* Lightest ocean blue */
+    margin: 1.12em 0;
+  }
+  
+  /* Image Styles */
+  .editor-image {
+    max-width: 100%;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    display: block;
+    cursor: move;
+  }
+  
+  .editor-image.align-left {
+    float: left;
+    margin-right: 1rem;
+  }
+  
+  .editor-image.align-center {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  
+  .editor-image.align-right {
+    float: right;
+    margin-left: 1rem;
+  }
+  
+  /* Code Cell Styles */
+  .code-cell {
+    position: relative;
+    margin: 1rem 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #1a3a4a; /* Ocean theme */
+    border: 1px solid #0d2b3a;
+    color: white;
+  }
+  
+  .code-content {
+    padding: 1rem;
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    outline: none;
+    min-height: 100px;
+  }
+  
+  .code-cell-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.25rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  .delete-code-cell {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ff6b6b;
+    padding: 0.25rem;
+  }
+  
+  /* Save Button */
+  .save-button {
+    background-color: #6a64f1; /* Ocean blue */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+    margin-left: auto;
+  }
+  
+  .save-button:hover {
+    background-color: #5c54ec; /* Darker ocean blue */
+  }
+  
+  /* Image Alignment Controls */
+  .image-controls {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.25rem;
+    display: none;
+    z-index: 100;
+  }
+  
+  .image-control-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .image-control-button:hover {
+    background: #f0f0f0;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .editor-toolbar {
+      gap: 0.1rem;
+    }
+    
+    .option-button, .adv-option-button {
+      padding: 0.3rem;
+      min-width: 32px;
+      height: 32px;
+      font-size: 0.8rem;
+    }
+    
+    .editor-content {
+      padding: 1rem;
+    }
+  }
+</style>
+
+<h1 style="font-size: 2rem;
+font-weight: 700;
+margin-bottom: 1.5rem;
+text-align: center;
+color: #333;font-family: 'Urbanist', sans-serif;
+      font-optical-sizing: auto;
+      font-style: normal;color:rgba(0, 0, 0, 0.638)">Projects</h1>
+<div class="editor-container">
+  <div class="editor-toolbar">
+    <!-- Basic Formatting -->
+    <div class="toolbar-group">
+      <button id="bold" class="option-button format" title="Bold"><i class="fa-solid fa-bold"></i></button>
+      <button id="italic" class="option-button format" title="Italic"><i class="fa-solid fa-italic"></i></button>
+      <button id="underline" class="option-button format" title="Underline"><i class="fa-solid fa-underline"></i></button>
+    </div>
+    
+    <!-- Lists -->
+    <div class="toolbar-group">
+      <button id="insertOrderedList" class="option-button" title="Ordered List"><i class="fa-solid fa-list-ol"></i></button>
+      <button id="insertUnorderedList" class="option-button" title="Unordered List"><i class="fa-solid fa-list"></i></button>
+    </div>
+    
+    <!-- Undo/Redo -->
+    <div class="toolbar-group">
+      <button id="undo" class="option-button" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+      <button id="redo" class="option-button" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+    </div>
+    
+    <!-- Links & Images -->
+    <div class="toolbar-group">
+      <button id="createLink" class="option-button" title="Insert Link"><i class="fa fa-link"></i></button>
+      <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+      <button id="insertImage" class="option-button" title="Insert Image"><i class="fa-solid fa-image"></i></button>
+    </div>
+    
+    <!-- Alignment -->
+    <div class="toolbar-group">
+      <button id="justifyLeft" class="option-button align" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+      <button id="justifyCenter" class="option-button align" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+      <button id="justifyRight" class="option-button align" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+    </div>
+    
+    <!-- Headings -->
+    <div class="toolbar-group">
+      <select id="formatBlock" class="adv-option-button" title="Heading Style">
+        <option value="">Normal Text</option>
+        <option value="H1">Heading 1</option>
+        <option value="H2">Heading 2</option>
+        <option value="H3">Heading 3</option>
+        <option value="H4">Heading 4</option>
+      </select>
+    </div>
+    
+    <!-- Code Cell -->
+    <div class="toolbar-group">
+      <button id="insertCodeCell" class="option-button" title="Insert Code Cell"><i class="fa-solid fa-code"></i></button>
+    </div>
+    
+    <!-- Save Button -->
+    <button id="saveToTask" class="save-button">Save to Task</button>
+  </div>
+  
+  <!-- Main Editing Area -->
+  <div id="text-input" class="editor-content" contenteditable="true" style="border: none; min-height:60vh;max-height:60vh;overflow-y:scroll;background-color: #e9e7e7;">
+    {{ task.document|safe }}
+  </div>
+  
+  <!-- Image Alignment Controls -->
+  <div id="imageControls" class="image-controls">
+    <button class="image-control-button" data-align="left" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+    <button class="image-control-button" data-align="center" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+    <button class="image-control-button" data-align="right" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+    <button class="image-control-button" id="removeImage" title="Remove Image"><i class="fa-solid fa-trash"></i></button>
+  </div>
+</div>
+
+<script>
+  // Element references
+  const optionsButtons = document.querySelectorAll(".option-button");
+  const formatBlock = document.getElementById("formatBlock");
+  const writingArea = document.getElementById("text-input");
+  const linkButton = document.getElementById("createLink");
+  const imageUpload = document.getElementById("imageUpload");
+  const insertImageButton = document.getElementById("insertImage");
+  const insertCodeCellButton = document.getElementById("insertCodeCell");
+  const imageControls = document.getElementById("imageControls");
+  
+  // Track currently selected image
+  let selectedImage = null;
+
+  // Initialize editor
+  const initializer = () => {
+    // Enable CSS styling
+    document.execCommand('styleWithCSS', false, true);
+    
+    // Load saved content
+    if(localStorage.getItem("savedText")){
+      writingArea.innerHTML = localStorage.getItem("savedText");
+    }
+    
+    // Add click handler to editor to detect image clicks
+    writingArea.addEventListener("click", handleEditorClick);
+    
+    // Add keyboard handler for image positioning
+    writingArea.addEventListener("keydown", handleImagePositioning);
+  };
+
+  // Handle editor clicks to detect image selection
+  function handleEditorClick(e) {
+    if (e.target.tagName === "IMG") {
+      selectedImage = e.target;
+      showImageControls(e.target);
+    } else {
+      hideImageControls();
+      selectedImage = null;
+    }
+  }
+
+  // Show image alignment controls
+  function showImageControls(img) {
+    const rect = img.getBoundingClientRect();
+    imageControls.style.display = "flex";
+    imageControls.style.top = `${rect.top - imageControls.offsetHeight - 5}px`;
+    imageControls.style.left = `${rect.left}px`;
+  }
+
+  // Hide image alignment controls
+  function hideImageControls() {
+    imageControls.style.display = "none";
+  }
+
+  // Handle image positioning with keyboard
+  function handleImagePositioning(e) {
+    if (selectedImage && e.key === " ") {
+      e.preventDefault();
+      // Toggle between alignment options
+      const currentAlign = selectedImage.className.match(/align-(left|center|right)/);
+      if (!currentAlign) {
+        selectedImage.classList.add("align-left");
+      } else if (currentAlign[1] === "left") {
+        selectedImage.className = selectedImage.className.replace("align-left", "align-center");
+      } else if (currentAlign[1] === "center") {
+        selectedImage.className = selectedImage.className.replace("align-center", "align-right");
+      } else {
+        selectedImage.className = selectedImage.className.replace("align-right", "");
+      }
+      localStorage.setItem("savedText", writingArea.innerHTML);
+    }
+  }
+
+  // Custom function to change heading
+  function changeHeading(headingTag) {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      // Find the block element
+      let node = selection.anchorNode;
+      while (node && node !== writingArea && !/^(P|DIV|H[1-6])$/.test(node.nodeName)) {
+        node = node.parentNode;
+      }
+      if (node && node !== writingArea) {
+        const newHeading = headingTag ? document.createElement(headingTag) : document.createElement("p");
+        newHeading.innerHTML = node.innerHTML;
+        node.parentNode.replaceChild(newHeading, node);
+        placeCaretAtEnd(newHeading);
+      }
+    }
+  }
+
+  // Place caret at the end of an element
+  function placeCaretAtEnd(el) {
+    el.focus();
+    if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  // Insert a code cell into the editor
+  function insertCodeCell() {
+    const codeCellHTML = `
+      <div class="code-cell" contenteditable="false">
+        <pre contenteditable="true" class="code-content">#Your code here...</pre>
+        <div class="code-cell-toolbar">
+          <button class="delete-code-cell" title="Delete Code Cell"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+      <p><br></p>
+    `;
+    document.execCommand("insertHTML", false, codeCellHTML);
+  }
+
+  // Basic command buttons
+  optionsButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      if (button.id === "insertCodeCell") {
+        insertCodeCell();
+        return;
+      }
+      document.execCommand(button.id, false, null);
+    });
+  });
+
+  // Heading selection
+  formatBlock.addEventListener("change", () => {
+    changeHeading(formatBlock.value);
+  });
+
+  // Link creation
+  linkButton.addEventListener("click", () => {
+    let userLink = prompt("Enter a URL:");
+    if(userLink){
+      if(!/^https?:\/\//i.test(userLink)){
+        userLink = "https://" + userLink;
+      }
+      document.execCommand("createLink", false, userLink);
+    }
+  });
+
+  // Auto-save content on input
+  writingArea.addEventListener("input", () => {
+    localStorage.setItem("savedText", writingArea.innerHTML);
+  });
+
+  // Image upload
+  insertImageButton.addEventListener("click", () => {
+    imageUpload.click();
+  });
+  
+  imageUpload.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        // Create image element with default classes
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "editor-image";
+        
+        // Insert at current cursor position
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(img);
+        } else {
+          writingArea.appendChild(img);
+        }
+        
+        // Focus on the image
+        selectedImage = img;
+        showImageControls(img);
+        
+        localStorage.setItem("savedText", writingArea.innerHTML);
+      };
+      reader.readAsDataURL(file);
+    }
+    event.target.value = '';
+  });
+
+  // Image alignment controls
+  document.querySelectorAll(".image-control-button").forEach(button => {
+    if (button.id !== "removeImage") {
+      button.addEventListener("click", (e) => {
+        if (selectedImage) {
+          // Remove all alignment classes first
+          selectedImage.className = selectedImage.className
+            .replace("align-left", "")
+            .replace("align-center", "")
+            .replace("align-right", "")
+            .trim();
+          
+          // Add selected alignment
+          if (e.currentTarget.dataset.align) {
+            selectedImage.classList.add(`align-${e.currentTarget.dataset.align}`);
+          }
+          
+          localStorage.setItem("savedText", writingArea.innerHTML);
+        }
+      });
+    }
+  });
+
+  // Remove image button
+  document.getElementById("removeImage").addEventListener("click", () => {
+    if (selectedImage) {
+      selectedImage.remove();
+      hideImageControls();
+      localStorage.setItem("savedText", writingArea.innerHTML);
+    }
+  });
+
+  // Delegated event listeners for code cell actions
+  writingArea.addEventListener("click", function(e) {
+    if (e.target.closest(".delete-code-cell")) {
+      e.target.closest(".code-cell").remove();
+      localStorage.setItem("savedText", writingArea.innerHTML);
+    }
+  });
+
+  // Initialize editor
+  window.onload = initializer;
+  
+  // Save to Task button functionality
+  document.getElementById("saveToTask").addEventListener("click", function(){
+    const content = document.getElementById("text-input").innerHTML;
+    sessionStorage.setItem("editorContent", content);
+    window.location.href = "{% url 'create_task_from_editor' %}";
+  });
+</script>
+
+{% endblock %}

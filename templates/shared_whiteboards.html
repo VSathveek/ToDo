@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .wrapper {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    h2 {
+        margin-top: 0;
+        font-size: 1.75rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5rem;
+    }
+
+    .whiteboard-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .whiteboard-item:last-child {
+        border-bottom: none;
+    }
+
+    .whiteboard-info a {
+        font-weight: bold;
+        text-decoration: none;
+        color: #333;
+    }
+
+    .whiteboard-info span {
+        display: block;
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.2rem;
+    }
+
+    .whiteboard-actions {
+        text-align: right;
+    }
+
+    .whiteboard-actions span {
+        display: block;
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 0.4rem;
+    }
+
+    button {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        border: 1px solid #d9534f;
+        background-color: transparent;
+        color: #d9534f;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #d9534f;
+        color: white;
+    }
+
+    .no-whiteboards {
+        padding: 1rem;
+        background-color: #eef2f5;
+        color: #555;
+        border-radius: 5px;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="wrapper">
+    <h2>Whiteboards Shared With Me</h2>
+
+    {% if shared_whiteboards %}
+        {% for whiteboard in shared_whiteboards %}
+        <div class="whiteboard-item">
+            <div class="whiteboard-info">
+                <a href="{% url 'view_whiteboard' whiteboard.id %}">
+                    {{ whiteboard.title }}
+                </a>
+                <span>Shared by: {{ whiteboard.created_by.username }}</span>
+            </div>
+            <div class="whiteboard-actions">
+                <span>{{ whiteboard.created_at|date:"M d, Y" }}</span>
+                <form class="remove-share-form" action="{% url 'remove_shared_whiteboard' whiteboard.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">✕ Remove</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-whiteboards">
+            No whiteboards have been shared with you yet.
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.remove-share-form').forEach(function(form) {
+        form.addEventListener('submit', function (e) {
+            if (!confirm('Remove this whiteboard from your shared list?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

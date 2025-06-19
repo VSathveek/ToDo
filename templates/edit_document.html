@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Document for {{ task.name }}{% endblock %}
+{% block content %}
+<h1>Edit Document for {{ task.name }}</h1>
+<div class="editorContainer">
+  <div class="options">
+    <!-- Basic Formatting -->
+    <button id="bold" class="option-button format" title="Bold"><i class="fa-solid fa-bold"></i></button>
+    <button id="italic" class="option-button format" title="Italic"><i class="fa-solid fa-italic"></i></button>
+    <button id="underline" class="option-button format" title="Underline"><i class="fa-solid fa-underline"></i></button>
+    <button id="strikethrough" class="option-button format" title="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
+    
+    <!-- Script -->
+    <button id="superscript" class="option-button script" title="Superscript"><i class="fa-solid fa-superscript"></i></button>
+    <button id="subscript" class="option-button script" title="Subscript"><i class="fa-solid fa-subscript"></i></button>
+    
+    <!-- Lists -->
+    <button id="insertOrderedList" class="option-button" title="Ordered List"><i class="fa-solid fa-list-ol"></i></button>
+    <button id="insertUnorderedList" class="option-button" title="Unordered List"><i class="fa-solid fa-list"></i></button>
+    
+    <!-- Undo/Redo -->
+    <button id="undo" class="option-button" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+    <button id="redo" class="option-button" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
+    
+    <!-- Links -->
+    <button id="createLink" class="adv-option-button" title="Insert Link"><i class="fa fa-link"></i></button>
+    <button id="unlink" class="option-button" title="Remove Link"><i class="fa fa-unlink"></i></button>
+    
+    <!-- Alignment -->
+    <button id="justifyLeft" class="option-button align" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+    <button id="justifyCenter" class="option-button align" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+    <button id="justifyRight" class="option-button align" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+    <button id="justifyFull" class="option-button align" title="Justify"><i class="fa-solid fa-align-justify"></i></button>
+    
+    <!-- Headings -->
+    <select id="formatBlock" class="adv-option-button" title="Change Heading">
+      <option value="">Normal</option>
+      <option value="H1">H1</option>
+      <option value="H2">H2</option>
+      <option value="H3">H3</option>
+      <option value="H4">H4</option>
+    </select>
+    
+    <!-- Font Selection with Preview -->
+    <select id="fontName" class="adv-option-button" title="Font Family"></select>
+    <span id="fontPreview" class="preview">Preview</span>
+    
+    <!-- Font Size with Preview -->
+    <select id="fontSize" class="adv-option-button" title="Font Size"></select>
+    <span id="fontSizePreview" class="preview">A</span>
+    
+    <!-- Color Picker with Preview -->
+    <input type="color" id="foreColor" class="adv-option-button" title="Font Color"/>
+    <span id="foreColorPreview" class="color-preview"></span>
+    
+    <input type="color" id="backColor" class="adv-option-button" title="Highlight Color"/>
+    <span id="backColorPreview" class="color-preview"></span>
+    
+    <!-- Image Upload -->
+    <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+    <button id="insertImage" class="option-button" title="Insert Image"><i class="fa-solid fa-image"></i></button>
+    
+    <!-- Insert Code Cell -->
+    <button id="insertCodeCell" class="option-button" title="Insert Code Cell"><i class="fa-solid fa-code"></i></button> 
+  </div>
+  
+  <!-- Main Editing Area (mix of text and code cells) -->
+  <div id="text-input" contenteditable="true" style="min-height:300px; border:1px solid #ccc; padding:10px;">
+    {{ task.document|safe }}
+  </div>
+  <input type="hidden" name="document_content" id="document_content">
+  <input type="hidden" id="task_id" value="{{ task.id }}">
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+  <button type="button" id="saveDocument" class="save-btn">Save Changes</button>
+  <input type="hidden" name="document_content" id="document_content">
+  
+</div>
+
+<script>
+  // Element references
+  let optionsButtons = document.querySelectorAll(".option-button");
+  let advancedOptionButton = document.querySelectorAll(".adv-option-button");
+  let fontName = document.getElementById("fontName");
+  let fontSizeRef = document.getElementById("fontSize");
+  let writingArea = document.getElementById("text-input");
+  let linkButton = document.getElementById("createLink");
+  let imageUpload = document.getElementById("imageUpload");
+  let insertImageButton = document.getElementById("insertImage");
+  let insertCodeCellButton = document.getElementById("insertCodeCell");
+  
+  // Preview Elements
+  let fontPreview = document.getElementById("fontPreview");
+  let fontSizePreview = document.getElementById("fontSizePreview");
+  let foreColorPreview = document.getElementById("foreColorPreview");
+  let backColorPreview = document.getElementById("backColorPreview");
+
+  let fontList = ["Arial", "Verdana", "Times New Roman", "Garamond", "Georgia", "Courier New", "cursive"];
+
+  // Initialize editor and persist settings from localStorage
+  const initializer = () => {
+    // Enable CSS styling
+    document.execCommand('styleWithCSS', false, true);
+    
+    // Populate Font Family Options
+    fontList.forEach(value => {
+      let option = document.createElement("option");
+      option.value = value;
+      option.innerHTML = value;
+      fontName.appendChild(option);
+    });
+    if(localStorage.getItem("fontName")){
+      fontName.value = localStorage.getItem("fontName");
+      fontPreview.style.fontFamily = fontName.value;
+    } else {
+      fontPreview.style.fontFamily = fontName.value;
+    }
+    
+    // Populate Font Size Options
+    for (let i = 1; i <= 7; i++) {
+      let option = document.createElement("option");
+      option.value = i;
+      option.innerHTML = i;
+      fontSizeRef.appendChild(option);
+    }
+    if(localStorage.getItem("fontSize")){
+      fontSizeRef.value = localStorage.getItem("fontSize");
+      fontSizePreview.style.fontSize = (parseInt(fontSizeRef.value) * 5 + 10) + "px";
+    } else {
+      fontSizeRef.value = 3;
+      fontSizePreview.style.fontSize = "25px";
+    }
+    
+    // Set default or saved colors
+    if(localStorage.getItem("foreColor")){
+      document.getElementById("foreColor").value = localStorage.getItem("foreColor");
+      foreColorPreview.style.backgroundColor = localStorage.getItem("foreColor");
+    } else {
+      document.getElementById("foreColor").value = "#000000";
+      foreColorPreview.style.backgroundColor = "#000000";
+    }
+    if(localStorage.getItem("backColor")){
+      document.getElementById("backColor").value = localStorage.getItem("backColor");
+      backColorPreview.style.backgroundColor = localStorage.getItem("backColor");
+    } else {
+      document.getElementById("backColor").value = "#ffffff";
+      backColorPreview.style.backgroundColor = "#ffffff";
+    }
+    
+    // Load saved content
+    if(localStorage.getItem("savedText")){
+      writingArea.innerHTML = localStorage.getItem("savedText");
+    }
+  };
+
+  // Custom function to change heading (wraps current block only)
+  function changeHeading(headingTag) {
+    let selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      let range = selection.getRangeAt(0);
+      // Find the block element
+      let node = selection.anchorNode;
+      while (node && node !== writingArea && !/^(P|DIV|H[1-6])$/.test(node.nodeName)) {
+        node = node.parentNode;
+      }
+      if (node && node !== writingArea) {
+        let newHeading = headingTag ? document.createElement(headingTag) : document.createElement("p");
+        newHeading.innerHTML = node.innerHTML;
+        node.parentNode.replaceChild(newHeading, node);
+        placeCaretAtEnd(newHeading);
+      }
+    }
+  }
+
+  // Place caret at the end of an element
+  function placeCaretAtEnd(el) {
+    el.focus();
+    if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+      let range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      let sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  // Custom function to apply font size by wrapping selection in a span
+  function applyFontSize(size) {
+    let selection = window.getSelection();
+    if (!selection.isCollapsed) {
+      let range = selection.getRangeAt(0);
+      let span = document.createElement("span");
+      span.style.fontSize = (parseInt(size) * 5 + 10) + "px";
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+    }
+  }
+
+  // Insert a code cell into the editor (allows interleaving text & code)
+  function insertCodeCell() {
+    const codeCellHTML = `
+      <div class="code-cell theme-default" contenteditable="false">
+        <pre contenteditable="true" class="code-content">Your code here...</pre>
+        <div class="code-cell-toolbar">
+          <select class="code-theme-selector" title="Select Code Theme">
+            <option value="default">Default</option>
+            <option value="ocean">Ocean</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+          <button class="delete-code-cell" title="Delete Code Cell"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>
+      <p><br></p>
+    `;
+    document.execCommand("insertHTML", false, codeCellHTML);
+  }
+
+  // Basic command buttons using execCommand (except for heading and fontSize)
+  optionsButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      if (button.id === "insertCodeCell") {
+        // Handled separately
+        return;
+      }
+      modifyText(button.id, false, null);
+    });
+  });
+
+  // Advanced options handler
+  advancedOptionButton.forEach(button => {
+    button.addEventListener("change", () => {
+      if(button.id === "formatBlock"){
+        changeHeading(button.value);
+      } else if(button.id === "fontSize"){
+        applyFontSize(button.value);
+        localStorage.setItem("fontSize", button.value);
+        fontSizePreview.style.fontSize = (parseInt(button.value) * 5 + 10) + "px";
+      } else {
+        modifyText(button.id, false, button.value);
+      }
+      // Save settings and update previews for font and colors
+      if(button.id === "fontName"){
+        localStorage.setItem("fontName", button.value);
+        fontPreview.style.fontFamily = button.value;
+      }
+      if(button.id === "foreColor"){
+        localStorage.setItem("foreColor", button.value);
+        foreColorPreview.style.backgroundColor = button.value;
+      }
+      if(button.id === "backColor"){
+        localStorage.setItem("backColor", button.value);
+        backColorPreview.style.backgroundColor = button.value;
+      }
+    });
+  });
+
+  // Execute a command
+  const modifyText = (command, defaultUi, value) => {
+    document.execCommand(command, defaultUi, value);
+  };
+
+  // Link creation
+  linkButton.addEventListener("click", () => {
+    let userLink = prompt("Enter a URL:");
+    if(userLink){
+      if(!/^https?:\/\//i.test(userLink)){
+        userLink = "https://" + userLink;
+      }
+      modifyText("createLink", false, userLink);
+    }
+  });
+
+  // Auto-save content on input
+  writingArea.addEventListener("input", () => {
+    localStorage.setItem("savedText", writingArea.innerHTML);
+  });
+
+  // Image upload
+  insertImageButton.addEventListener("click", () => {
+    imageUpload.click();
+  });
+  imageUpload.addEventListener("change", (event) => {
+    let file = event.target.files[0];
+    if(file){
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        let img = document.createElement("img");
+        img.src = e.target.result;
+        img.style.maxWidth = "100%";
+        writingArea.appendChild(img);
+        localStorage.setItem("savedText", writingArea.innerHTML);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Insert Code Cell button
+  insertCodeCellButton.addEventListener("click", () => {
+    insertCodeCell();
+  });
+
+  // Delegated event listeners within the editor for code cell actions
+  writingArea.addEventListener("click", function(e) {
+    // Delete Code Cell
+    if (e.target.closest(".delete-code-cell")) {
+      e.target.closest(".code-cell").remove();
+    }
+  });
+
+  // Handle theme change for code cells
+  writingArea.addEventListener("change", function(e) {
+    if (e.target.matches(".code-theme-selector")) {
+      let theme = e.target.value;
+      let codeCell = e.target.closest(".code-cell");
+      codeCell.classList.remove("theme-default", "theme-ocean", "theme-dark", "theme-light");
+      codeCell.classList.add("theme-" + theme);
+    }
+  });
+
+  window.onload = initializer;
+
+
+
+
+  document.getElementById("saveDocument").addEventListener("click", async function() {
+      // Get updated editor content
+      const updatedContent = document.getElementById("text-input").innerHTML;
+      // Get the task id from the hidden field
+      const taskId = document.getElementById("task_id").value;
+      
+      if (!taskId) {
+          alert("Error: No task id found!");
+          return;
+      }
+      
+      // Prepare form data for AJAX request
+      const formData = new FormData();
+      formData.append("task_id", taskId);
+      formData.append("document_content", updatedContent);
+      
+      // Get the CSRF token
+      const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+      
+      try {
+          const response = await fetch("{% url 'update_task_document' %}", {
+              method: "POST",
+              body: formData,
+              headers: {
+                  "X-CSRFToken": csrfToken
+              }
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+              alert("Document updated successfully!");
+              // Optionally, redirect or update the UI as needed.
+          } else {
+              alert("Error: " + data.message);
+          }
+      } catch (error) {
+          console.error("Error updating document:", error);
+          alert("An error occurred while saving changes.");
+      }
+  });
+
+
+
+</script>
+
+{% endblock %}

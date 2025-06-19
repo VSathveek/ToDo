@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Update Task{% endblock %}
+
+{% block content %}
+  <h1>Update Task: {{ task.name }}</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <label for="id_additional_files">Upload Additional Files:</label>
+    <input type="file" name="additional_files" id="id_additional_files" multiple>
+    
+    <button type="submit" class="btn btn-primary">Update Task</button>
+  </form>
+
+  <h3>Existing Additional Files</h3>
+  <ul>
+    {% for file in files %}
+      <li>
+        <a href="{{ file.get_file_url }}">{{ file.file.name }}</a>
+        <!-- Link to delete the file -->
+        <a href="{% url 'delete_task_file' file.id %}" class="btn btn-danger btn-sm">Delete</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <a href="{% url 'task_detail' task.pk %}" class="btn btn-secondary">Cancel</a>
+{% endblock %}

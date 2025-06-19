@@ -1,0 +1,88 @@
+Step 1: What is Machine Learning?
+Machine Learning is a branch of AI that enables computers to learn from data and improve their performance on tasks without being explicitly programmed.
+
+Key Idea:
+Instead of writing rules manually, ML algorithms learn patterns from data.
+
+
+
+Step 2: Types of Machine Learning
+
+Supervised Learning:
+
+	The model learns from labeled data (input-output pairs).
+	Example: Predicting house prices based on size and location.
+
+
+Unsupervised Learning:
+
+	The model identifies patterns in unlabeled data.
+	Example: Grouping similar customers (clustering).
+
+Reinforcement Learning:
+
+	The model learns by interacting with the environment and receiving feedback 	(rewards or penalties).
+	Example: Training a robot to walk.
+
+
+
+Step 3: Basic ML Pipeline
+
+	Data Collection: Gather data for your problem.
+
+	Data Preprocessing: Clean and prepare data for the model.
+
+	Model Selection: Choose a suitable algorithm.
+
+	Training: Teach the model using data.
+
+	Evaluation: Test how well the model performs.
+
+	Prediction: Use the model to make predictions.
+
+
+
+Step 4: Libraries for ML in Python
+
+	NumPy (for numerical operations)
+
+	Pandas (for data manipulation)
+
+	Matplotlib/Seaborn (for visualization)
+
+	Scikit-learn (for ML algorithms)
+
+
+
+
+Today, we’ll focus on Linear Regression—one of the simplest and most fundamental concepts in machine learning.
+
+
+What is Linear Regression?
+
+	Linear Regression is a method used to find the relationship between two 	variables and make predictions.
+
+	Real-World Example:
+	Imagine you own a shop and observe:
+
+	When the temperature increases, more ice creams are sold.
+ou want to predict how many ice creams you’ll sell if tomorrow's temperature is 30°C.
+Linear regression helps establish a relationship like:
+
+Sales
+=
+𝑚
+⋅
+Temperature
++
+𝑐
+Sales=m⋅Temperature+c
+Where:
+
+𝑚
+m: How much sales increase for every 1°C increase in temperature (slope).
+𝑐
+c: How many ice creams are sold even when the temperature is 0°C (intercept)
+
+
+

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="notification-container" style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+    <h1>Notifications for {{ today }}</h1>
+    {% if notifications %}
+        <ul style="list-style-type: none; padding: 0;">
+            {% for task in notifications %}
+                <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                    <a href="{% url 'task_detail' task.id %}" style="text-decoration: none; color: #6862da;">
+                        {{ task.name }}
+                    </a> is due today!
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No notifications for today.</p>
+    {% endif %}
+</div>
+{% endblock %}

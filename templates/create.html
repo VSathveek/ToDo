@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .create-whiteboard-wrapper {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1rem;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: Arial, sans-serif;
+    }
+
+    .create-whiteboard-wrapper h2 {
+        margin-top: 0;
+        font-size: 1.75rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5rem;
+    }
+
+    .create-form {
+        margin-top: 1rem;
+    }
+
+    .create-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+
+    .create-form input[type="text"] {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 1.2rem;
+    }
+
+    .create-form .button-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .create-form button,
+    .create-form .back-link {
+        padding: 8px 14px;
+        font-size: 0.95rem;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .create-form button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+
+    .create-form button:hover {
+        background-color: #0056b3;
+    }
+
+    .create-form .back-link {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+    }
+
+    .create-form .back-link:hover {
+        background-color: #5a6268;
+    }
+</style>
+
+<div class="create-whiteboard-wrapper">
+    <h2>Create New Whiteboard</h2>
+    <form method="post" class="create-form">
+        {% csrf_token %}
+        <label for="id_title">Whiteboard Title</label>
+        <input type="text" id="id_title" name="title" required>
+
+        <div class="button-group">
+            <button type="submit">＋ Create Whiteboard</button>
+            <a href="{% url 'list_whiteboards' %}" class="back-link">← Back to List</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

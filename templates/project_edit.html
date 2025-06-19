@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Edit Project{% endblock %}
+
+{% block content %}
+<h1>Edit Project: <input type="text" id="project-title" value="{{ project.title }}"></h1>
+
+<!-- Option to attach to an existing Task -->
+<label for="task-select">Attach to Task (optional):</label>
+<select id="task-select">
+    <option value="">--None--</option>
+    {% for task in user.tasks_created.all %}
+        <option value="{{ task.id }}" {% if project.task and project.task.id == task.id %}selected{% endif %}>
+            {{ task.name }}
+        </option>
+    {% endfor %}
+</select>
+
+<!-- Notebook container -->
+<div id="notebook">
+    {% for cell in cells %}
+        <div class="cell">
+            <select class="cell-type">
+                <option value="text" {% if cell.cell_type == 'text' %}selected{% endif %}>Text</option>
+                <option value="code" {% if cell.cell_type == 'code' %}selected{% endif %}>Code</option>
+            </select>
+            <!-- Text Editor -->
+            <div class="editor text-editor" {% if cell.cell_type != 'text' %}style="display:none;"{% endif %}>
+                <textarea class="cell-content">{{ cell.content }}</textarea>
+            </div>
+            <!-- Code Editor -->
+            <div class="editor code-editor" {% if cell.cell_type != 'code' %}style="display:none;"{% endif %}>
+                <textarea class="cell-content">{{ cell.content }}</textarea>
+            </div>
+            <button class="remove-cell">Remove Cell</button>
+        </div>
+    {% endfor %}
+</div>
+<button id="add-cell" type="button">Add Cell</button>
+<button id="save-project" type="button">Save Project</button>
+<button id="export-word" type="button">Export as Word</button>
+
+<!-- Include html-docx-js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-docx-js/0.2.2/html-docx.js"></script>
+
+<script>
+  // Toggle editor visibility on cell type change
+  document.querySelectorAll('.cell-type').forEach(function(selectElem) {
+      selectElem.addEventListener('change', function() {
+          const cellDiv = this.closest('.cell');
+          const textEditor = cellDiv.querySelector('.text-editor');
+          const codeEditor = cellDiv.querySelector('.code-editor');
+          if (this.value === 'text') {
+              textEditor.style.display = 'block';
+              codeEditor.style.display = 'none';
+          } else {
+              textEditor.style.display = 'none';
+              codeEditor.style.display = 'block';
+          }
+      });
+  });
+
+  // Remove cell handler
+  document.querySelectorAll('.remove-cell').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          this.closest('.cell').remove();
+      });
+  });
+
+  // Add new cell handler (default to text cell)
+  document.getElementById('add-cell').addEventListener('click', function() {
+      const notebook = document.getElementById('notebook');
+      const newCell = document.createElement('div');
+      newCell.classList.add('cell');
+      newCell.innerHTML = `
+          <select class="cell-type">
+              <option value="text" selected>Text</option>
+              <option value="code">Code</option>
+          </select>
+          <div class="editor text-editor">
+              <textarea class="cell-content"></textarea>
+          </div>
+          <div class="editor code-editor" style="display:none;">
+              <textarea class="cell-content"></textarea>
+          </div>
+          <button class="remove-cell">Remove Cell</button>
+      `;
+      notebook.appendChild(newCell);
+      // Add event listeners for new cell
+      newCell.querySelector('.cell-type').addEventListener('change', function() {
+          const cellDiv = this.closest('.cell');
+          const textEditor = cellDiv.querySelector('.text-editor');
+          const codeEditor = cellDiv.querySelector('.code-editor');
+          if (this.value === 'text') {
+              textEditor.style.display = 'block';
+              codeEditor.style.display = 'none';
+          } else {
+              textEditor.style.display = 'none';
+              codeEditor.style.display = 'block';
+          }
+      });
+      newCell.querySelector('.remove-cell').addEventListener('click', function(e) {
+          e.preventDefault();
+          this.closest('.cell').remove();
+      });
+  });
+
+  // Save project via AJAX
+  document.getElementById('save-project').addEventListener('click', function() {
+      const cells = [];
+      document.querySelectorAll('.cell').forEach(function(cellDiv) {
+          const cellType = cellDiv.querySelector('.cell-type').value;
+          const content = cellDiv.querySelector('.cell-content').value;
+          cells.push({cell_type: cellType, content: content});
+      });
+      const payload = {
+          title: document.getElementById('project-title').value,
+          task_id: document.getElementById('task-select').value,
+          cells: cells
+      };
+      fetch("", {  // current URL
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify(payload)
+      }).then(response => {
+          if(response.redirected){
+              window.location.href = response.url;
+          }
+      });
+  });
+
+  // Export as Word using html-docx-js
+  document.getElementById('export-word').addEventListener('click', function() {
+      // Get the HTML content from the notebook container
+      var content = document.getElementById('notebook').innerHTML;
+      
+      // Wrap the content in a basic HTML structure with the necessary namespaces for Word
+      var preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' " +
+                    "xmlns:w='urn:schemas-microsoft-com:office:word' " +
+                    "xmlns='http://www.w3.org/TR/REC-html40'>" +
+                    "<head><meta charset='utf-8'><title>Exported Document</title></head><body>";
+      var postHtml = "</body></html>";
+      var html = preHtml + content + postHtml;
+      
+      // Use html-docx-js to convert the HTML to a Blob in .docx format
+      var blob = htmlDocx.asBlob(html, {orientation: 'portrait'});
+      var filename = "project.docx";
+      
+      // Trigger a download of the generated document
+      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveOrOpenBlob(blob, filename);
+      } else {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+      }
+  });
+</script>
+{% endblock %}

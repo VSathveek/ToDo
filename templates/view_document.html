@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Document for {{ task.name }}{% endblock %}
+
+{% block content %}
+<style>
+  /* General styles */
+
+.documentContainer {
+  display:flex;
+  flex-direction: column;
+}
+
+.document-viewer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.action-section {
+    margin-left:40%
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+    border: none;
+    color: white;
+    text-align: center;
+}
+
+.btn-edit {
+    background-color: #6660d8;
+    border: none;
+}
+
+.btn-edit:hover {
+    background-color: #4e49a8;
+    transform: translateY(-2px);
+}
+
+.btn-edit i {
+    margin-right: 8px;
+}
+
+.document-viewer p {
+    line-height: 1.6;
+    font-size: 1rem;
+    color: #444;
+}
+
+.document-viewer h1, .document-viewer h2, .document-viewer h3 {
+    font-weight: 600;
+    color: #222;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+    }
+
+    .document-viewer {
+        padding: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+    }
+}
+
+</style>
+<h1>Viewing {{ task.name }} </h1>
+<div class="documentContainer">
+    <!-- Document Viewer Section -->
+    <div class="document-viewer">
+        <!-- Render the document HTML content safely -->
+        {{ document|safe }}
+    </div>
+
+    <!-- Edit Document Button Section -->
+    <div class="action-section">
+        <a href="{% url 'edit_task_document' task.id %}" class="btn btn-edit">
+            <i class="fas fa-edit"></i> Edit Document
+        </a>
+    </div>
+</div>
+{% endblock %}
