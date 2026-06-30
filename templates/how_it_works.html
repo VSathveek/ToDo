@@ -1,43 +1,33 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How it Works</title>
-    <link rel="stylesheet" href="{% static 'styles2.css' %}">
-</head>
-<body>
-    <div class="content-container">
-        <h1>How It Works</h1>
-        <p>
-            This page explains the inner workings of our project. Here you'll find details about the architecture,
-            technologies used, and the flow of data throughout the application.
-        </p>
-        
-        <h2>System Architecture</h2>
-        <p>
-            The system is based on a microservices architecture, where each service is responsible for a specific task.
-            Communication between the services happens through REST APIs. [You can add diagrams, charts, or more detailed information here.]
-        </p>
-        
-        <h2>Technologies Used</h2>
-        <ul>
-            <li><strong>Frontend:</strong> React, HTML, CSS, JavaScript</li>
-            <li><strong>Backend:</strong> Node.js, Express.js</li>
-            <li><strong>Database:</strong> MongoDB, PostgreSQL</li>
-            <li><strong>Cloud:</strong> AWS, Docker, Kubernetes</li>
-        </ul>
+{% extends 'base.html' %}
+{% block title %}How It Works{% endblock %}
 
-        <h2>Data Flow</h2>
-        <p>
-            The application follows a request-response model where user inputs are processed by the backend
-            services, and results are returned to the frontend for display. Data is stored in both SQL and NoSQL databases
-            for different use cases.
-        </p>
-        <p>
-            [You can add diagrams or videos to explain the flow of data more clearly here.]
-        </p>
+{% block content %}
+<div class="page-panel">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Overview</p>
+      <h1>How It Works</h1>
+      <p class="page-subtitle">A clean breakdown of the architecture, workflow and tools powering your productivity.</p>
     </div>
-</body>
-</html>
+  </div>
+
+  <div class="content-section">
+    <h2>Application Architecture</h2>
+    <p>This app uses Django and Channels for real-time task management, with a modern frontend layout for dashboards, forms, and collaboration pages.</p>
+  </div>
+
+  <div class="content-section">
+    <h2>Primary Technologies</h2>
+    <ul class="feature-list">
+      <li>Django for backend logic and template rendering</li>
+      <li>Channels for WebSocket notifications and live updates</li>
+      <li>Responsive CSS design for a polished dashboard experience</li>
+    </ul>
+  </div>
+
+  <div class="content-section">
+    <h2>Data Flow</h2>
+    <p>Users create and manage tasks through the dashboard, with data saved to the database and displayed in real time across the interface.</p>
+  </div>
+</div>
+{% endblock %}
