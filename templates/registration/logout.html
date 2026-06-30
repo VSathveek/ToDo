@@ -1,61 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logged Out</title>
-    <style>
-        /* General Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends 'base.html' %}
+{% block title %}Logged Out{% endblock %}
+{% block body_class %}auth-page{% endblock %}
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .logout-container {
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        p {
-            font-size: 16px;
-            color: #555;
-        }
-
-        a {
-            color: #6a64f1;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="logout-container">
-        <h2>You have been logged out successfully.</h2>
-        <p><a href="{% url 'login' %}">Go to Login Page</a></p>
+{% block content %}
+<div class="content-container auth-form-page">
+  <div class="form-panel success-panel">
+    <h1>Logged Out Successfully</h1>
+    <p>You have been signed out. Come back anytime to manage your tasks.</p>
+    <div class="button-container">
+      <a href="{% url 'login' %}" class="btn primary-btn">Go to Login</a>
     </div>
-</body>
-</html>
+  </div>
+</div>
+{% endblock %}
