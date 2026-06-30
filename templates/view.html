@@ -1,19 +1,15 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends 'base.html' %}
+{% block title %}Whiteboard: {{ whiteboard.title }}{% endblock %}
 
 {% block content %}
-<head>{{ whiteboard.content|json_script:"whiteboard-data" }}
-    {{ save_url|json_script:"save-url" }}</head>
+{{ whiteboard.content|json_script:"whiteboard-data" }}
+{{ save_url|json_script:"save-url" }}
 <div class="whiteboard-wrapper">
     <div class="whiteboard-header">
         <h2 class="whiteboard-title">{{ whiteboard.title }}</h2>
         <div class="whiteboard-controls">
-            <button id="save-btn" class="btn primary-btn">
-                💾 Save
-            </button>
-            <a href="{% url 'list_whiteboards' %}" class="btn secondary-btn">
-                ← All Whiteboards
-            </a>
+            <button id="save-btn" class="btn primary-btn">💾 Save</button>
+            <a href="{% url 'list_whiteboards' %}" class="btn secondary-btn">← All Whiteboards</a>
         </div>
     </div>
 
@@ -36,9 +32,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-
-
+{% block extra_scripts %}
 <script>
     const whiteboardData = JSON.parse(document.getElementById('whiteboard-data').textContent);
     const saveUrl = JSON.parse(document.getElementById('save-url').textContent);
@@ -48,13 +44,11 @@
         let isDrawing = false;
         let currentTool = 'pencil';
         let currentColor = '#000000';
-        const whiteboardData = JSON.parse(document.getElementById('whiteboard-data').textContent);
         let elements = whiteboardData.elements || [];
 
-        // Set canvas size
         function resizeCanvas() {
             const container = document.querySelector('.whiteboard-canvas-container');
-            canvas.width = container.clientWidth - 40; // Account for padding
+            canvas.width = container.clientWidth - 40;
             canvas.height = container.clientHeight;
             redrawCanvas();
         }
@@ -65,27 +59,17 @@
             });
             document.getElementById(toolId).classList.add('active');
             currentTool = toolId;
-            
-            // Change cursor based on tool
-            if (toolId === 'eraser') {
-                canvas.style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><rect width=\"24\" height=\"24\" fill=\"white\"/><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" fill=\"black\"/></svg>') 8 8, auto";
-            } else {
-                canvas.style.cursor = "crosshair";
-            }
         }
 
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             elements.forEach(element => {
-                if (element.type === 'eraser') return; // Skip erased elements
-                
+                if (element.type === 'eraser') return;
                 ctx.strokeStyle = element.color;
                 ctx.fillStyle = element.color;
                 ctx.lineWidth = element.lineWidth || 2;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
-                
                 switch(element.type) {
                     case 'pencil':
                         ctx.beginPath();
@@ -95,30 +79,20 @@
                         }
                         ctx.stroke();
                         break;
-                        
-                    case 'line':
-                        ctx.beginPath();
-                        ctx.moveTo(element.startX, element.startY);
-                        ctx.lineTo(element.endX, element.endY);
-                        ctx.stroke();
-                        break;
-                        
                     case 'rectangle':
                         const width = element.endX - element.startX;
                         const height = element.endY - element.startY;
                         ctx.strokeRect(element.startX, element.startY, width, height);
                         break;
-                        
                     case 'circle':
                         const radius = Math.sqrt(
-                            Math.pow(element.endX - element.startX, 2) + 
+                            Math.pow(element.endX - element.startX, 2) +
                             Math.pow(element.endY - element.startY, 2)
                         );
                         ctx.beginPath();
                         ctx.arc(element.startX, element.startY, radius, 0, 2 * Math.PI);
                         ctx.stroke();
                         break;
-                        
                     case 'text':
                         ctx.font = '16px Arial';
                         ctx.fillText(element.text, element.x, element.y);
@@ -127,346 +101,17 @@
             });
         }
 
-        function startDrawing(e) {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            if (currentTool === 'text') {
-                const text = prompt('Enter text:');
-                if (text) {
-                    elements.push({
-                        type: 'text',
-                        x: x,
-                        y: y,
-                        text: text,
-                        color: currentColor,
-                        lineWidth: 2
-                    });
-                    redrawCanvas();
-                }
-                isDrawing = false;
-            } else if (currentTool === 'eraser') {
-                // Find and mark elements under the eraser
-                elements.forEach(element => {
-                    if (element.type === 'eraser') return;
-                    
-                    // Simple point-in-element check (basic implementation)
-                    if (element.type === 'text') {
-                        const textWidth = ctx.measureText(element.text).width;
-                        if (x >= element.x && x <= element.x + textWidth && 
-                            y >= element.y - 16 && y <= element.y) {
-                            element.type = 'eraser';
-                        }
-                    } else if (element.type === 'pencil') {
-                        for (let i = 0; i < element.points.length; i++) {
-                            const point = element.points[i];
-                            const distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
-                            if (distance < 10) { // Eraser radius
-                                element.type = 'eraser';
-                                break;
-                            }
-                        }
-                    }
-                });
-                redrawCanvas();
-            } else if (currentTool === 'pencil') {
-                elements.push({
-                    type: 'pencil',
-                    color: currentColor,
-                    points: [{x: x, y: y}],
-                    lineWidth: 2
-                });
-            } else {
-                elements.push({
-                    type: currentTool,
-                    startX: x,
-                    startY: y,
-                    endX: x,
-                    endY: y,
-                    color: currentColor,
-                    lineWidth: 2
-                });
-            }
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            const currentElement = elements[elements.length - 1];
-            
-            if (currentTool === 'eraser') {
-                // Continue erasing while moving
-                elements.forEach(element => {
-                    if (element.type === 'eraser') return;
-                    
-                    if (element.type === 'pencil') {
-                        for (let i = 0; i < element.points.length; i++) {
-                            const point = element.points[i];
-                            const distance = Math.sqrt(Math.pow(x - point.x, 2) + Math.pow(y - point.y, 2));
-                            if (distance < 10) {
-                                element.type = 'eraser';
-                                break;
-                            }
-                        }
-                    }
-                });
-            } else if (currentTool === 'pencil') {
-                currentElement.points.push({x: x, y: y});
-            } else if (currentElement.type !== 'eraser') {
-                currentElement.endX = x;
-                currentElement.endY = y;
-            }
-            
-            redrawCanvas();
-        }
-
-        function stopDrawing() {
-            if (!isDrawing) return;
-            isDrawing = false;
-        }
-        document.getElementById('save-btn').addEventListener('click', function() {
-            saveToServer();
-        });
-        function saveToServer() {
-    const elementsToSave = elements.filter(el => el.type !== 'eraser');
-    
-    fetch(saveUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'),
-        },
-        body: JSON.stringify({elements: elementsToSave})
-    })
-    .then(response => {
-        // First check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            return response.text().then(text => {
-                throw new Error(`Expected JSON but got: ${text.substring(0, 100)}...`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Whiteboard saved successfully!');
-            elements = elementsToSave;
-        } else {
-            throw new Error(data.message || 'Unknown error');
-        }
-    })
-    .catch(error => {
-        console.error('Error saving whiteboard:', error);
-        alert('Error saving whiteboard: ' + error.message);
-    });
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-        // Initialize canvas
-        resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
-
-        // Tool selection
+        resizeCanvas();
         document.getElementById('pencil').addEventListener('click', () => setActiveTool('pencil'));
         document.getElementById('eraser').addEventListener('click', () => setActiveTool('eraser'));
         document.getElementById('rectangle').addEventListener('click', () => setActiveTool('rectangle'));
         document.getElementById('circle').addEventListener('click', () => setActiveTool('circle'));
         document.getElementById('text').addEventListener('click', () => setActiveTool('text'));
-        
-        // Color picker
-        document.getElementById('color-picker').addEventListener('input', (e) => {
-            currentColor = e.target.value;
+        document.getElementById('clear').addEventListener('click', function() {
+            elements = [];
+            redrawCanvas();
         });
-        
-        // Clear button
-        document.getElementById('clear').addEventListener('click', () => {
-            if (confirm('Clear the entire whiteboard?')) {
-                elements = [];
-                redrawCanvas();
-            }
-        });
-        
-
-        // Drawing events
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-
-        // Touch support for mobile devices
-        canvas.addEventListener('touchstart', handleTouch);
-        canvas.addEventListener('touchmove', handleTouch);
-        canvas.addEventListener('touchend', stopDrawing);
-
-        function handleTouch(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const mouseEvent = new MouseEvent(
-                e.type === 'touchstart' ? 'mousedown' : 'mousemove',
-                {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                }
-            );
-            if (e.type === 'touchstart') {
-                startDrawing(mouseEvent);
-            } else {
-                draw(mouseEvent);
-            }
-        }
     });
 </script>
-
-<style>
-    /* Main Wrapper */
-    .whiteboard-wrapper {
-        margin-top: 30px;
-        padding: 0 20px;
-    }
-
-    /* Header Styles */
-    .whiteboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    .whiteboard-title {
-        font-size: 2rem;
-        margin: 0;
-    }
-
-    /* Control Buttons */
-    .whiteboard-controls {
-        display: flex;
-        gap: 15px;
-    }
-    .btn {
-        padding: 10px 15px;
-        border: none;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: background-color 0.3s;
-    }
-    .primary-btn {
-        background-color: #007bff;
-        color: #fff;
-    }
-    .primary-btn:hover {
-        background-color: #0056b3;
-    }
-    .secondary-btn {
-        background-color: #6c757d;
-        color: #fff;
-    }
-    .secondary-btn:hover {
-        background-color: #5a6268;
-    }
-    .danger-btn {
-        background-color: #dc3545;
-        color: #fff;
-    }
-    .danger-btn:hover {
-        background-color: #c82333;
-    }
-
-    /* Whiteboard Card */
-    .whiteboard-card {
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    /* Toolbar */
-    .whiteboard-toolbar {
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #ddd;
-    }
-    .tool-group {
-        display: flex;
-        gap: 10px;
-    }
-    .tool-btn {
-        padding: 8px 15px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    .tool-btn:hover {
-        background-color: #e0e0e0;
-    }
-    .tool-btn.active {
-        background-color: #007bff;
-        color: #fff;
-    }
-
-    /* Color Picker */
-    .color-picker {
-        padding: 6px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-    }
-
-    /* Canvas Container */
-    .whiteboard-canvas-container {
-        padding: 20px;
-        background-color: #f5f5f5;
-        height: 70vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .whiteboard-canvas {
-        width: 100%;
-        height: 100%;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        background-color: white;
-        touch-action: none; /* Important for mobile */
-    }
-
-    /* Make canvas full width on mobile */
-    @media (max-width: 768px) {
-        .whiteboard-canvas-container {
-            height: 60vh;
-            padding: 10px;
-        }
-        .whiteboard-toolbar {
-            flex-direction: column;
-            gap: 10px;
-        }
-        .tool-group {
-            justify-content: center;
-        }
-    }
-</style>
 {% endblock %}
