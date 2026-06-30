@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 {% load static %}
 
@@ -6,226 +6,138 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Task Management{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
-    <!-- Google Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=notifications" />
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p6I4NHVS2yQW/Jc60rdCLd1c/PIp1AhWJRI8STEO6gNro/p0sKx0sVo+ljV8s9KYQBqlz0AN/3Ik/AHs4a2zbw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=2">
+    <style>body{background:#090b13;color:#eef2ff;}a{color:inherit;text-decoration:none;}</style>
 </head>
 
-<body>
-    <div class="container">
+<body class="{% block body_class %}{% endblock %}">
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <div class="brand-block">
+                <div class="brand-mark">T</div>
+                <div>
+                    <p class="brand-name">TaskFlow</p>
+                    <p class="brand-subtitle">Workspace overview</p>
+                </div>
+            </div>
 
-        <!-- Sidebar -->
-        <aside class="sidebar" style="border-right:1px solid rgba(64, 64, 64, 0.292);">
-            <h2 class="sidebar-title">Menu</h2>
-            <ul class="sidebar-list">
-                <li>
-                    <a href="/" class="sidebar-link" id="dashboardMain">
-                        <span class="material-icons">dashboard</span>
-                        <span class="tooltip">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'createtask' %}" class="sidebar-link" id="AddTask">
-                        <span class="material-icons">add_task</span>
-                        <span class="tooltip">Create Tasks</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'projects' %}" class="sidebar-link" id="editorMain">
-                        <span class="material-icons">folder</span>
-                        <span class="tooltip">Projects</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'task_efficiency' %}" class="sidebar-link" id="EfficiencyMain">
-                        <span class="material-icons">trending_up</span>
-                        <span class="tooltip">Efficiency</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'calendar_view' %}" class="sidebar-link" id="calendarMain">
-                        <span class="material-icons">calendar_today</span>
-                        <span class="tooltip">Calendar</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'sticky_notes' %}" class="sidebar-link" style="margin-top:20px;" id="stickyNotes">
-                        <span class="material-icons">sticky_note_2</span>
-                        <span class="tooltip">Sticky notes</span>
-                    </a>
-                </li>
-                <!--<li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="whiteboardDropdown" role="button" data-toggle="dropdown">
-                        <i class="fas fa-paint-brush mr-1"></i> Whiteboards
-                    </a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'create_whiteboard' %}">
-                            <i class="fas fa-plus-circle mr-1"></i> Create New
-                        </a>
-                        <a class="dropdown-item" href="{% url 'list_whiteboards' %}">
-                            <i class="fas fa-list mr-1"></i> My Whiteboards
-                        </a>
-                        <a class="dropdown-item" href="{% url 'shared_whiteboards' %}">
-                            <i class="fas fa-share-alt mr-1"></i> Shared With Me
-                        </a>
-                    </div>
-                </li>-->
-                
-            </ul>
+            <nav class="nav-menu">
+                <a href="/" class="nav-link" id="dashboardMain">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{% url 'createtask' %}" class="nav-link" id="AddTask">
+                    <span class="material-symbols-outlined">add_task</span>
+                    <span>Create Task</span>
+                </a>
+                <a href="{% url 'projects' %}" class="nav-link" id="editorMain">
+                    <span class="material-symbols-outlined">folder</span>
+                    <span>Projects</span>
+                </a>
+                <a href="{% url 'task_efficiency' %}" class="nav-link" id="EfficiencyMain">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    <span>Efficiency</span>
+                </a>
+                <a href="{% url 'calendar_view' %}" class="nav-link" id="calendarMain">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    <span>Calendar</span>
+                </a>
+                <a href="{% url 'sticky_notes' %}" class="nav-link" id="stickyNotes">
+                    <span class="material-symbols-outlined">sticky_note_2</span>
+                    <span>Sticky Notes</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Need help?</p>
+                <a href="{% url 'developers' %}" class="footer-link">Developer notes</a>
+            </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <div class="search-bar">
-                    <div class="header-search-container" style="display: inline-block; white-space: nowrap;">
-                        <form method="GET" action="{% url 'dashboard' %}" style="display: inline;">
-                            <input type="text" name="q" placeholder="Search tasks..." 
-                                   value="{{ request.GET.q }}" 
-                                   style="width: 400px; height: 50px; border-radius: 10px 0 0 10px; border: 1px solid #ddd; box-shadow: 5px 5px 10px rgba(0,0,0,0.1); margin: 0; padding: 0 15px; vertical-align: top;">
-                            <button type="submit" 
-                                    style="height: 50px; width: 50px; background: #6862da; color: white; border: none; border-radius: 0 10px 10px 0; margin: 0; padding: 0; cursor: pointer; vertical-align: top;">
-                                <i class="fas fa-search" style="font-size: 18px;"></i>
-                            </button>
+        <main class="app-main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div class="search-input">
+                        <form method="GET" action="{% url 'dashboard' %}" class="search-form">
+                            <input type="text" name="q" placeholder="Search tasks, projects or people..." value="{{ request.GET.q }}">
+                            <button type="submit"><i class="fas fa-search"></i></button>
                         </form>
                     </div>
                 </div>
-                <div class="time-container" id="timeContol">
-                    <a id="current-time" class="time-display" href="{% url 'calendar_view' %}" ></a>
-                </div>
 
-                <!-- Notification Button -->
-                <button id="openNotificationModal" class="open-notification-btn" style="position:relative;">
-                    <a class="notifications" id="notificationsID">
-                      <span class="material-symbols-outlined">
-                        notifications
-                      </span>
-                      {% if notifications_count > 0 %}
-                        <span class="notification-badge">{{ notifications_count }}</span>
-                      {% endif %}
-                    </a>
-                  </button>
-                  
-
-                    <!-- Notification Modal -->
-                    <div id="notificationModal" class="notification-modal">
-                    <div class="notification-modal-content">
-                        <span id="closeNotificationModal" class="close">&times;</span>
-                        
-                        <ul id="notificationList">
-                        {% if notifications %}
-                            {% for task in notifications %}
-                            <li>
-                                <a href="{% url 'task_detail' task.id %}">{{ task.name }}</a> is due today!
-                            </li>
-                            {% endfor %}
-                        {% else %}
-                            <li>No new notifications </li>
+                <div class="topbar-right">
+                    <a href="{% url 'calendar_view' %}" class="pill-link">Calendar</a>
+                    <button id="openNotificationModal" class="icon-button" aria-label="Notifications">
+                        <span class="material-symbols-outlined">notifications</span>
+                        {% if notifications_count > 0 %}
+                        <span class="badge">{{ notifications_count }}</span>
                         {% endif %}
-                        </ul>
-                    </div>
-                    </div>
+                    </button>
 
-                
-
-                <div class="account" id="account-menu">
-                    <div class="account-dropdown" id="account-dropdown">
-                        <form action="{% url 'logout' %}" method="post" style="margin:0;">
+                    <div class="account-block">
+                        <form action="{% url 'logout' %}" method="post" class="logout-form">
                             {% csrf_token %}
-                            <button type="submit" class="logout-btn" id="logoutBTN">
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/></svg>
-                                <span class="tooltip">DrawBoard</span>
+                            <button type="submit" class="logout-btn">
+                                <i class="fas fa-right-from-bracket"></i> Logout
                             </button>
                         </form>
                     </div>
                 </div>
-
             </header>
 
-            <!-- Content Section -->
-            <section class="content" id="main-body"style="padding-top:30px;">
+            <section class="page-content">
                 {% block content %}
                 {% endblock %}
             </section>
         </main>
     </div>
-<!--
-    <footer>
-        <div class="footer-content">
-            <a href="{% url 'developers' %}" class="footer-link">Check Out Developers</a>
-            <a href="{% url 'how_it_works' %}" class="footer-link">How All This Works</a>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; {{ current_year }} Task Management website. All rights reserved.</p>
-        </div>
-    </footer>-->
 
-    <!-- Scripts -->
+    <div id="notificationModal" class="notification-modal">
+        <div class="notification-panel">
+            <button id="closeNotificationModal" class="close-modal" aria-label="Close notifications">&times;</button>
+            <h3>Notifications</h3>
+            <ul class="notification-list" id="notificationList">
+                {% if notifications %}
+                    {% for task in notifications %}
+                        <li><a href="{% url 'task_detail' task.id %}">{{ task.name }}</a> is due today.</li>
+                    {% endfor %}
+                {% else %}
+                    <li>No new notifications yet.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
     <script src="{% static 'script.js' %}"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Get the current URL path
+        document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
-
-            // Get all the sidebar links
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-
-            // Loop through each link and check if it matches the current path
-            sidebarLinks.forEach(link => {
-                // Compare the link's href with the current path
+            document.querySelectorAll('.nav-link').forEach(link => {
                 if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active'); // Add 'active' class if matched
+                    link.classList.add('active');
                 } else {
-                    link.classList.remove('active'); // Remove 'active' class if not matched
+                    link.classList.remove('active');
+                }
+            });
+
+            const modal = document.getElementById('notificationModal');
+            const openBtn = document.getElementById('openNotificationModal');
+            const closeBtn = document.getElementById('closeNotificationModal');
+
+            openBtn.addEventListener('click', () => modal.classList.add('visible'));
+            closeBtn.addEventListener('click', () => modal.classList.remove('visible'));
+            window.addEventListener('click', event => {
+                if (event.target === modal) {
+                    modal.classList.remove('visible');
                 }
             });
         });
-
-        document.addEventListener("DOMContentLoaded", function() {
-  const modal = document.getElementById("notificationModal");
-  const openBtn = document.getElementById("openNotificationModal");
-  const closeBtn = document.getElementById("closeNotificationModal");
-
-  // Open modal when button is clicked
-  openBtn.addEventListener("click", function() {
-    modal.style.display = "block";
-  });
-
-  // Close modal when the close icon is clicked
-  closeBtn.addEventListener("click", function() {
-    modal.style.display = "none";
-  });
-
-  // Close modal if user clicks outside the modal content
-  window.addEventListener("click", function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  });
-});
-
-
-
-
-
-
-
     </script>
-    {% block extra_scripts %}
-    {% endblock %}
-<!-- jQuery first, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
