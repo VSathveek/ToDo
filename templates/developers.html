@@ -1,55 +1,33 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Developers</title>
-    <link rel="stylesheet" href="{% static 'styles2.css' %}">
-</head>
-<body>
-    <div class="content-container">
-        <h1>Our Developers</h1>
-        <p>
-            Welcome to our developers page! Here you will find profiles and details about the talented individuals
-            behind this project. [Add more detailed information, images, links to profiles, etc.]
-        </p>
-        
-        <h2>Meet Our Team</h2>
-        
-        <div class="developer-container">
-            <!-- Developer Profile 1 -->
-            <div class="profile-card">
-                <img src="developer1.jpg" alt="Developer 1">
-                <h3>John Doe</h3>
-                <p>Full Stack Developer</p>
-                <p>John is responsible for the backend architecture and overall functionality of the system.</p>
-            </div>
-            
-            <!-- Developer Profile 2 -->
-            <div class="profile-card">
-                <img src="developer2.jpg" alt="Developer 2">
-                <h3>Jane Smith</h3>
-                <p>Frontend Developer</p>
-                <p>Jane specializes in building intuitive and visually appealing user interfaces.</p>
-            </div>
-            
-            <!-- Developer Profile 3 -->
-            <div class="profile-card">
-                <img src="developer3.jpg" alt="Developer 3">
-                <h3>Emily White</h3>
-                <p>UX/UI Designer</p>
-                <p>Emily ensures a seamless and engaging user experience across the platform.</p>
-            </div>
-            
-            <!-- Developer Profile 4 -->
-            <div class="profile-card">
-                <img src="developer4.jpg" alt="Developer 4">
-                <h3>Michael Brown</h3>
-                <p>DevOps Engineer</p>
-                <p>Michael manages cloud infrastructure and ensures the project's smooth deployment.</p>
-            </div>
-        </div>
+{% extends 'base.html' %}
+{% block title %}Developers{% endblock %}
+
+{% block content %}
+<div class="page-panel">
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Team</p>
+      <h1>Our Developers</h1>
+      <p class="page-subtitle">Meet the talented individuals shaping this project with clean code and modern UX.</p>
     </div>
-</body>
-</html>
+  </div>
+
+  <div class="card-grid">
+    <div class="profile-card">
+      <h3>Backend Architect</h3>
+      <p>Builds the server infrastructure, REST endpoints and maintains system reliability.</p>
+    </div>
+    <div class="profile-card">
+      <h3>Frontend Designer</h3>
+      <p>Designs the interface, improves usability and ensures the site looks polished across devices.</p>
+    </div>
+    <div class="profile-card">
+      <h3>Data Integrator</h3>
+      <p>Connects real-time features, task storage and messaging for seamless app behavior.</p>
+    </div>
+    <div class="profile-card">
+      <h3>Product Strategist</h3>
+      <p>Defines the app flow, feature priorities and keeps the experience focused on productivity.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
